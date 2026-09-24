@@ -1,0 +1,19 @@
+{
+  "name": "VAYRO — Digital Experiences",
+  "short_name": "VAYRO",
+  "description": "منصة عرض مشاريع رقمية متكاملة",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B0F15",
+  "theme_color": "#7C83FF",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "https://i.supaimg.com/965e0c3e-50d9-4ba0-97dc-487d00fde583/5cafc614-098b-4be6-b1b0-66b21417dbfa.jpg", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "https://i.supaimg.com/965e0c3e-50d9-4ba0-97dc-487d00fde583/5cafc614-098b-4be6-b1b0-66b21417dbfa.jpg", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "https://i.supaimg.com/965e0c3e-50d9-4ba0-97dc-487d00fde583/5cafc614-098b-4be6-b1b0-66b21417dbfa.jpg", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "https://i.supaimg.com/965e0c3e-50d9-4ba0-97dc-487d00fde583/5cafc614-098b-4be6-b1b0-66b21417dbfa.jpg", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
