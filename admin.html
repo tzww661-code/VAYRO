@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAYRO — لوحة تحكم الأدمن</title>
+
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<style>
+:root {
+    --font-main: 'IBM Plex Sans Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-latin: 'Plus Jakarta Sans', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+    --bg-primary: #0B0F15;
+    --bg-secondary: #121821;
+    --bg-tertiary: #1A2230;
+    --text-primary: #F1F5F9;
+    --text-secondary: #A0AEC0;
+    --text-muted: #64748B;
+    --border-color: #232C3A;
+    --accent-color: #7C83FF;
+    --accent-hover: #9AA0FF;
+    --accent-light: #1B2140;
+    --danger: #F87171;
+    --warning: #FBBF24;
+    --success: #34D399;
+    --header-bg: #0F141C;
+    --heart-red: #F43F5E;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+    font-family: var(--font-main);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    padding-bottom: 40px;
+}
+h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+a { text-decoration: none; color: inherit; }
+button { border: none; outline: none; background: none; font-family: inherit; cursor: pointer; color: inherit; transition: all 0.2s; }
+img { display: block; max-width: 100%; }
+input, textarea, select { font-family: inherit; color: var(--text-primary); background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 13px 15px; outline: none; font-size: 0.92rem; width: 100%; transition: border-color 0.2s, background 0.2s; font-weight: 500; }
+input::placeholder { color: var(--text-muted); font-weight: 400; }
+input:focus, textarea:focus, select:focus { border-color: var(--accent-color); background: var(--bg-secondary); }
+select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 14px center; background-size: 14px; padding-left: 36px; }
+
+/* Header */
+.admin-header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap;
+}
+.admin-header-brand {
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 800; font-size: 1.15rem;
+    font-family: var(--font-latin); letter-spacing: 3px;
+}
+.admin-header-brand .crown-badge {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--accent-color);
+    color: #FFF; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+}
+.admin-header-actions { display: flex; align-items: center; gap: 10px; }
+.admin-header-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-radius: 11px;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+    color: var(--text-primary); font-size: 0.85rem; font-weight: 700;
+    transition: all 0.2s;
+}
+.admin-header-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+.admin-header-btn.logout { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger); }
+.admin-header-btn.logout:hover { background: rgba(239, 68, 68, 0.2); }
+
+/* Container */
+.admin-container { max-width: 1200px; margin: 0 auto; padding: 22px 18px; }
+
+.admin-hero {
+    background: var(--accent-color);
+    color: #FFF; border-radius: 24px;
+    padding: 30px 24px; text-align: center;
+    margin-bottom: 20px; position: relative; overflow: hidden;
+}
+.admin-hero .hero-crown {
+    width: 80px; height: 80px; border-radius: 24px;
+    background: rgba(255, 255, 255, 0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; margin: 0 auto 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+}
+.admin-hero h1 { font-size: 1.5rem; margin-bottom: 6px; font-weight: 800; }
+.admin-hero p { font-size: 0.88rem; opacity: 0.9; }
+
+/* Stats */
+.admin-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 20px; }
+@media (min-width: 700px) { .admin-stats-grid { grid-template-columns: repeat(4, 1fr); } }
+.admin-stat-box { background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: 18px; padding: 20px 14px; text-align: center; transition: all 0.3s; }
+.admin-stat-box:hover { transform: translateY(-2px); border-color: var(--accent-color); }
+.admin-stat-icon { width: 46px; height: 46px; border-radius: 14px; background: var(--accent-light); color: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; margin: 0 auto 12px; }
+.admin-stat-num { font-size: 1.7rem; font-weight: 800; font-family: var(--font-latin); line-height: 1; margin-bottom: 6px; }
+.admin-stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
+
+/* Tabs */
+.admin-tabs { display: flex; gap: 8px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.admin-tabs::-webkit-scrollbar { display: none; }
+.admin-tab {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 18px; border-radius: 12px;
+    background: var(--bg-secondary); border: 1.5px solid var(--border-color);
+    color: var(--text-secondary); font-size: 0.88rem; font-weight: 700;
+    white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+}
+.admin-tab:hover { border-color: var(--accent-color); color: var(--accent-color); }
+.admin-tab.active { background: var(--accent-color); color: #FFF; border-color: var(--accent-color); }
+
+/* Panel */
+.admin-panel-section { background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: 22px; overflow: hidden; margin-bottom: 16px; }
+.admin-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
+.admin-panel-header h3 { font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.admin-panel-header h3 i { color: var(--accent-color); }
+
+.admin-panel-body { padding: 18px 20px 22px; }
+
+/* Form */
+.admin-form { display: flex; flex-direction: column; gap: 14px; }
+.admin-form-group { display: flex; flex-direction: column; gap: 6px; }
+.admin-form-group label { font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+.admin-form-group label i { color: var(--accent-color); font-size: 0.8rem; }
+.admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .admin-form-row { grid-template-columns: 1fr; } }
+.admin-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 20px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.admin-btn.primary { background: var(--accent-color); color: #FFF; }
+.admin-btn.primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.admin-btn.success { background: var(--success); color: #FFF; }
+.admin-btn.success:hover { background: #10B981; transform: translateY(-1px); }
+.admin-btn.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1.5px solid rgba(239, 68, 68, 0.3); }
+.admin-btn.danger:hover { background: rgba(239, 68, 68, 0.2); }
+.admin-btn.ghost { background: var(--bg-tertiary); color: var(--text-primary); border: 1.5px solid var(--border-color); }
+.admin-btn.ghost:hover { border-color: var(--accent-color); color: var(--accent-color); }
+.admin-btn.full { width: 100%; }
+
+/* Projects List */
+.admin-projects-list { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.admin-project-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); transition: all 0.2s; }
+.admin-project-item:hover { border-color: var(--accent-color); }
+.admin-project-item.deleting { opacity: 0.4; pointer-events: none; }
+.admin-project-thumb { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: var(--bg-secondary); flex-shrink: 0; border: 1px solid var(--border-color); }
+.admin-project-info { flex-grow: 1; min-width: 0; }
+.admin-project-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-project-info .meta { display: flex; gap: 12px; font-size: 0.72rem; color: var(--text-muted); flex-wrap: wrap; }
+.admin-project-info .meta span { display: inline-flex; align-items: center; gap: 4px; }
+.admin-project-info .meta i { color: var(--accent-color); font-size: 0.7rem; }
+.admin-project-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.admin-icon-btn { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+.admin-icon-btn:hover { transform: scale(1.05); }
+.admin-icon-btn.delete:hover { color: var(--danger); border-color: var(--danger); }
+.admin-icon-btn.view:hover { color: var(--success); border-color: var(--success); }
+.admin-icon-btn.edit:hover { color: var(--accent-color); border-color: var(--accent-color); }
+
+.admin-empty-msg { text-align: center; padding: 50px 20px; color: var(--text-muted); font-size: 0.9rem; }
+.admin-empty-msg i { display: block; font-size: 3rem; margin-bottom: 12px; opacity: 0.4; color: var(--accent-color); }
+
+/* Change Password */
+.password-section .admin-panel-header { background: var(--accent-color); color: #FFF; border-bottom: none; }
+.password-section .admin-panel-header h3 { color: #FFF; }
+.password-section .admin-panel-header h3 i { color: #FFF; }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 22px; width: 100%; max-width: 420px; padding: 28px 24px; position: relative; animation: modalIn 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.92) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.confirm-icon { width: 76px; height: 76px; border-radius: 50%; background: rgba(124, 131, 255, 0.15); color: var(--accent-color); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 18px; }
+.confirm-icon.success { background: rgba(52, 211, 153, 0.15); color: var(--success); }
+.confirm-icon.danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.modal-box h3 { text-align: center; font-size: 1.2rem; margin-bottom: 10px; font-weight: 800; }
+.modal-box p { text-align: center; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 22px; }
+.confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.confirm-btn { padding: 14px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.2s; border: none; }
+.confirm-btn.cancel { background: var(--bg-tertiary); color: var(--text-primary); border: 1.5px solid var(--border-color); }
+.confirm-btn.cancel:hover { border-color: var(--danger); color: var(--danger); }
+.confirm-btn.approve { background: var(--accent-color); color: #FFF; }
+.confirm-btn.approve:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.confirm-btn.approve.danger { background: var(--danger); }
+.confirm-btn.approve.danger:hover { background: #EF4444; }
+.confirm-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+/* Guard */
+.guard-overlay { position: fixed; inset: 0; background: var(--bg-primary); z-index: 4000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.guard-box { background: var(--bg-secondary); border: 1.5px solid var(--border-color); border-radius: 24px; padding: 36px 26px; text-align: center; max-width: 400px; width: 100%; }
+.guard-box .guard-icon { width: 80px; height: 80px; border-radius: 24px; background: rgba(239, 68, 68, 0.15); color: var(--danger); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 18px; }
+.guard-box h2 { font-size: 1.3rem; margin-bottom: 10px; font-weight: 800; }
+.guard-box p { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 22px; }
+.guard-box .guard-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px; border-radius: 14px; background: var(--accent-color); color: #FFF; font-size: 0.95rem; font-weight: 800; border: none; cursor: pointer; transition: all 0.2s; }
+.guard-box .guard-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+/* Edit Modal */
+.edit-modal-box { max-width: 560px; max-height: 90vh; overflow-y: auto; }
+.edit-modal-box h3 { text-align: center; font-size: 1.2rem; margin-bottom: 8px; font-weight: 800; }
+.edit-modal-box .edit-sub { text-align: center; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 20px; }
+.edit-modal-close { position: absolute; top: 14px; left: 14px; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); }
+.edit-modal-close:hover { color: var(--danger); border-color: var(--danger); }
+
+/* Inline notification (بدل التوست الخضراء) */
+.inline-alert {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.inline-alert.show { display: flex; }
+.inline-alert.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
+.inline-alert.success { background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); color: var(--success); }
+
+@media (max-width: 500px) {
+    .admin-header { padding: 12px 14px; }
+    .admin-header-btn span { display: none; }
+    .admin-header-btn { padding: 10px 12px; }
+    .admin-container { padding: 16px 12px; }
+    .admin-hero { padding: 24px 18px; }
+    .admin-hero h1 { font-size: 1.3rem; }
+    .admin-project-info h4 { font-size: 0.88rem; }
+    .admin-project-thumb { width: 56px; height: 56px; }
+    .admin-icon-btn { width: 34px; height: 34px; font-size: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ GUARD OVERLAY ============ -->
+<div class="guard-overlay" id="guardOverlay" style="display: none;">
+    <div class="guard-box">
+        <div class="guard-icon"><i class="fa-solid fa-lock"></i></div>
+        <h2>الدخول محظور</h2>
+        <p>لازم تدخل من الصفحة الرئيسية أولًا عن طريق صندوق الأدمن، وبعدها هتوصل هنا تلقائيًا.</p>
+        <a href="index.html" class="guard-btn">
+            <i class="fa-solid fa-arrow-right"></i>
+            <span>الرجوع للصفحة الرئيسية</span>
+        </a>
+    </div>
+</div>
+
+<!-- ============ MAIN ADMIN PAGE ============ -->
+<div id="adminMain" style="display: none;">
+
+    <header class="admin-header">
+        <div class="admin-header-brand">
+            <div class="crown-badge"><i class="fa-solid fa-crown"></i></div>
+            <span>لوحة الأدمن</span>
+        </div>
+        <div class="admin-header-actions">
+            <a href="index.html" class="admin-header-btn">
+                <i class="fa-solid fa-house"></i>
+                <span>الموقع</span>
+            </a>
+            <button class="admin-header-btn logout" onclick="adminLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="admin-container">
+
+        <div class="admin-hero">
+            <div class="hero-crown"><i class="fa-solid fa-crown"></i></div>
+            <h1>مرحبًا بك في لوحة التحكم</h1>
+            <p>إدارة كاملة للمشاريع + تغيير كلمة المرور</p>
+        </div>
+
+        <div class="admin-stats-grid">
+            <div class="admin-stat-box">
+                <div class="admin-stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="admin-stat-num" id="statTotal">0</div>
+                <div class="admin-stat-lbl">إجمالي المشاريع</div>
+            </div>
+            <div class="admin-stat-box">
+                <div class="admin-stat-icon"><i class="fa-solid fa-star" style="color: var(--warning);"></i></div>
+                <div class="admin-stat-num" id="statFeatured">0</div>
+                <div class="admin-stat-lbl">مشاريع مميزة</div>
+            </div>
+            <div class="admin-stat-box">
+                <div class="admin-stat-icon"><i class="fa-solid fa-eye"></i></div>
+                <div class="admin-stat-num" id="statViews">0</div>
+                <div class="admin-stat-lbl">إجمالي المشاهدات</div>
+            </div>
+            <div class="admin-stat-box">
+                <div class="admin-stat-icon"><i class="fa-solid fa-heart" style="color: var(--heart-red);"></i></div>
+                <div class="admin-stat-num" id="statLikes">0</div>
+                <div class="admin-stat-lbl">إجمالي الإعجابات</div>
+            </div>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="projects" onclick="switchAdminTab('projects')">
+                <i class="fa-solid fa-list"></i>
+                <span>المشاريع</span>
+            </button>
+            <button class="admin-tab" data-tab="add" onclick="switchAdminTab('add')">
+                <i class="fa-solid fa-plus"></i>
+                <span>إضافة مشروع</span>
+            </button>
+            <button class="admin-tab" data-tab="password" onclick="switchAdminTab('password')">
+                <i class="fa-solid fa-key"></i>
+                <span>تغيير كلمة المرور</span>
+            </button>
+        </div>
+
+        <!-- TAB: Projects -->
+        <div class="admin-panel-section" id="tab-projects">
+            <div class="admin-panel-header">
+                <h3><i class="fa-solid fa-list"></i> جميع المشاريع</h3>
+                <button class="admin-btn primary" onclick="switchAdminTab('add')">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>إضافة مشروع</span>
+                </button>
+            </div>
+            <div class="admin-projects-list" id="adminProjectsList">
+                <div class="admin-empty-msg">
+                    <i class="fa-solid fa-inbox"></i>
+                    جاري التحميل...
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Add Project -->
+        <div class="admin-panel-section" id="tab-add" style="display: none;">
+            <div class="admin-panel-header">
+                <h3><i class="fa-solid fa-plus"></i> إضافة مشروع جديد</h3>
+            </div>
+            <div class="admin-panel-body">
+                <form class="admin-form" id="adminAddProjectForm">
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-heading"></i> اسم المشروع</label>
+                        <input type="text" id="apTitle" placeholder="مثال: موقع شخصي" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-align-right"></i> وصف المشروع</label>
+                        <textarea id="apDesc" placeholder="وصف قصير وجذاب..." rows="3" required></textarea>
+                    </div>
+                    <div class="admin-form-row">
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-tag"></i> التصنيف</label>
+                            <select id="apCategory" required>
+                                <option value="websites">مواقع</option>
+                                <option value="gifts">هدايا</option>
+                                <option value="weddings">أفراح</option>
+                                <option value="eid">الأعياد</option>
+                                <option value="books">كتب</option>
+                                <option value="experiments">تجارب Web</option>
+                            </select>
+                        </div>
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-star"></i> مشروع مميز؟</label>
+                            <select id="apFeatured">
+                                <option value="false">لا</option>
+                                <option value="true">نعم — يظهر في المميزة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-image"></i> رابط صورة الغلاف</label>
+                        <input type="url" id="apCover" placeholder="https://..." required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-link"></i> رابط الموقع المباشر (اختياري)</label>
+                        <input type="url" id="apLive" placeholder="https://...">
+                    </div>
+                    <div class="admin-form-row">
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-code"></i> سعر الكود</label>
+                            <input type="number" id="apCodePrice" placeholder="0" min="0">
+                        </div>
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-tags"></i> السعر القديم (اختياري)</label>
+                            <input type="number" id="apOldPrice" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    <button type="submit" class="admin-btn success full" id="addSubmitBtn">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>نشر المشروع الآن</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB: Change Password -->
+        <div class="admin-panel-section password-section" id="tab-password" style="display: none;">
+            <div class="admin-panel-header">
+                <h3><i class="fa-solid fa-key"></i> تغيير كلمة المرور</h3>
+            </div>
+            <div class="admin-panel-body">
+                <form class="admin-form" id="adminChangePassForm">
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-id-card"></i> اسم المستخدم الحالي</label>
+                        <input type="text" id="cpUsername" placeholder="اسم المستخدم" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-lock"></i> كلمة السر الحالية</label>
+                        <input type="password" id="cpOldPassword" placeholder="••••••••" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-key"></i> كلمة السر الجديدة</label>
+                        <input type="password" id="cpNewPassword" placeholder="••••••••" required minlength="6">
+                    </div>
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-check-double"></i> تأكيد كلمة السر الجديدة</label>
+                        <input type="password" id="cpConfirmPassword" placeholder="••••••••" required minlength="6">
+                    </div>
+                    <button type="submit" class="admin-btn primary full">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>تغيير كلمة المرور</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="confirm-icon" id="confirmIcon"><i class="fa-solid fa-circle-question"></i></div>
+        <h3 id="confirmTitle">تأكيد</h3>
+        <p id="confirmMsg">هل أنت متأكد؟</p>
+        <div class="confirm-actions">
+            <button class="confirm-btn cancel" onclick="closeConfirmModal()">
+                <i class="fa-solid fa-xmark"></i>
+                <span>إلغاء</span>
+            </button>
+            <button class="confirm-btn approve" id="confirmApproveBtn">
+                <i class="fa-solid fa-check"></i>
+                <span>موافق</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ EDIT MODAL ============ -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box edit-modal-box">
+        <button class="edit-modal-close" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
+        <h3>تعديل المشروع</h3>
+        <p class="edit-sub">عدّل البيانات اللي عايزها ثم اضغط حفظ</p>
+        <div class="inline-alert" id="editAlert"></div>
+        <form class="admin-form" id="editProjectForm">
+            <input type="hidden" id="epId">
+            <div class="admin-form-group">
+                <label><i class="fa-solid fa-heading"></i> اسم المشروع</label>
+                <input type="text" id="epTitle" required>
+            </div>
+            <div class="admin-form-group">
+                <label><i class="fa-solid fa-align-right"></i> وصف المشروع</label>
+                <textarea id="epDesc" rows="3" required></textarea>
+            </div>
+            <div class="admin-form-row">
+                <div class="admin-form-group">
+                    <label><i class="fa-solid fa-tag"></i> التصنيف</label>
+                    <select id="epCategory" required>
+                        <option value="websites">مواقع</option>
+                        <option value="gifts">هدايا</option>
+                        <option value="weddings">أفراح</option>
+                        <option value="eid">الأعياد</option>
+                        <option value="books">كتب</option>
+                        <option value="experiments">تجارب Web</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label><i class="fa-solid fa-star"></i> مشروع مميز؟</label>
+                    <select id="epFeatured">
+                        <option value="false">لا</option>
+                        <option value="true">نعم</option>
+                    </select>
+                </div>
+            </div>
+            <div class="admin-form-group">
+                <label><i class="fa-solid fa-image"></i> رابط صورة الغلاف</label>
+                <input type="url" id="epCover" required>
+            </div>
+            <div class="admin-form-group">
+                <label><i class="fa-solid fa-link"></i> رابط الموقع المباشر (اختياري)</label>
+                <input type="url" id="epLive">
+            </div>
+            <div class="admin-form-row">
+                <div class="admin-form-group">
+                    <label><i class="fa-solid fa-code"></i> سعر الكود</label>
+                    <input type="number" id="epCodePrice" placeholder="0" min="0">
+                </div>
+                <div class="admin-form-group">
+                    <label><i class="fa-solid fa-tags"></i> السعر القديم (اختياري)</label>
+                    <input type="number" id="epOldPrice" placeholder="0" min="0">
+                </div>
+            </div>
+            <button type="submit" class="admin-btn success full" id="editSubmitBtn">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>حفظ التعديلات</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   SUPABASE
+   ============================================================ */
+const SUPABASE_URL = 'https://iujkmcawxfhwrmlkdxgg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NCTgz3VA1ZrLY-GrciTt8w_0gqO-2f6';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allProjects = [];
+
+/* ============================================================
+   🔐 AUTH GUARD
+   ============================================================ */
+function checkAdminAccess() {
+    const access = sessionStorage.getItem('vayro_admin_access');
+    const accessTime = parseInt(sessionStorage.getItem('vayro_admin_time') || '0', 10);
+    const now = Date.now();
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+
+    if (access === 'granted' && (now - accessTime) < TWO_HOURS) {
+        document.getElementById('guardOverlay').style.display = 'none';
+        document.getElementById('adminMain').style.display = 'block';
+        return true;
+    } else {
+        document.getElementById('guardOverlay').style.display = 'flex';
+        document.getElementById('adminMain').style.display = 'none';
+        return false;
+    }
+}
+
+function adminLogout() {
+    sessionStorage.removeItem('vayro_admin_access');
+    sessionStorage.removeItem('vayro_admin_time');
+    window.location.href = 'index.html';
+}
+
+/* ============================================================
+   CONFIRM MODAL
+   ============================================================ */
+let _confirmCallback = null;
+function showConfirmModal(title, msg, callback, iconType = 'question') {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    const iconEl = document.getElementById('confirmIcon');
+    const approveBtn = document.getElementById('confirmApproveBtn');
+
+    iconEl.className = 'confirm-icon';
+    approveBtn.className = 'confirm-btn approve';
+    approveBtn.disabled = false;
+    approveBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>موافق</span>';
+
+    if (iconType === 'success') {
+        iconEl.classList.add('success');
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+    } else if (iconType === 'danger') {
+        iconEl.classList.add('danger');
+        iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+        approveBtn.classList.add('danger');
+    } else {
+        iconEl.innerHTML = '<i class="fa-solid fa-circle-question"></i>';
+    }
+
+    _confirmCallback = callback;
+    document.getElementById('confirmModal').classList.add('active');
+}
+function closeConfirmModal() {
+    document.getElementById('confirmModal').classList.remove('active');
+    _confirmCallback = null;
+}
+document.getElementById('confirmApproveBtn').addEventListener('click', async () => {
+    if (!_confirmCallback) { closeConfirmModal(); return; }
+    const btn = document.getElementById('confirmApproveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري...</span>';
+    try {
+        await _confirmCallback();
+    } finally {
+        closeConfirmModal();
+    }
+});
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function switchAdminTab(tab) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.admin-panel-section').forEach(s => s.style.display = 'none');
+    const target = document.getElementById('tab-' + tab);
+    if (target) {
+        target.style.display = 'block';
+        gsap.fromTo(target, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3 });
+    }
+    if (tab === 'projects') renderAdminProjects();
+}
+
+/* ============================================================
+   LOAD & RENDER PROJECTS
+   ============================================================ */
+async function loadProjects() {
+    const { data, error } = await db.from('projects').select('*').order('created_at', { ascending: false });
+    if (error) { console.error('[LOAD ERROR]', error); return; }
+    allProjects = (data || []).map(p => ({
+        ...p,
+        views_count: p.views_count || 0,
+        likes_count: p.likes_count || 0,
+        comments_count: p.comments_count || 0,
+        shares_count: p.shares_count || 0
+    }));
+    renderAdminProjects();
+    renderAdminStats();
+}
+
+function renderAdminProjects() {
+    const list = document.getElementById('adminProjectsList');
+    if (!list) return;
+    if (!allProjects.length) {
+        list.innerHTML = `<div class="admin-empty-msg"><i class="fa-solid fa-inbox"></i>لا توجد مشاريع — ابدأ بإضافة أول مشروع</div>`;
+        return;
+    }
+    list.innerHTML = allProjects.map(p => `
+        <div class="admin-project-item" data-id="${p.id}">
+            <img class="admin-project-thumb" src="${p.cover_url || 'https://via.placeholder.com/100'}" alt="" onerror="this.src='https://via.placeholder.com/100'">
+            <div class="admin-project-info">
+                <h4>${escapeHtml(p.title)}</h4>
+                <div class="meta">
+                    <span><i class="fa-solid fa-tag"></i> ${escapeHtml(p.category || '')}</span>
+                    <span><i class="fa-solid fa-eye"></i> ${p.views_count}</span>
+                    <span><i class="fa-solid fa-heart"></i> ${p.likes_count}</span>
+                    <span><i class="fa-solid fa-comment"></i> ${p.comments_count}</span>
+                    ${p.is_featured ? '<span style="color:var(--warning);"><i class="fa-solid fa-star"></i> مميز</span>' : ''}
+                </div>
+            </div>
+            <div class="admin-project-actions">
+                ${p.live_url ? `<button class="admin-icon-btn view" onclick="openLiveSite('${p.live_url.replace(/'/g, '&#39;')}')" title="فتح الموقع"><i class="fa-solid fa-globe"></i></button>` : ''}
+                <button class="admin-icon-btn edit" onclick="openEditModal('${p.id}')" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                <button class="admin-icon-btn delete" onclick="confirmDeleteProject('${p.id}', '${escapeAttr(p.title)}')" title="حذف"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderAdminStats() {
+    document.getElementById('statTotal').textContent = allProjects.length;
+    document.getElementById('statFeatured').textContent = allProjects.filter(p => p.is_featured).length;
+    document.getElementById('statViews').textContent = allProjects.reduce((s, p) => s + (p.views_count || 0), 0);
+    document.getElementById('statLikes').textContent = allProjects.reduce((s, p) => s + (p.likes_count || 0), 0);
+}
+
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function escapeAttr(s) { return String(s || '').replace(/'/g, "&#39;").replace(/"/g, '&quot;'); }
+
+function openLiveSite(url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/* ============================================================
+   ✅ DELETE PROJECT (إصلاح كامل + مسح من قاعدة البيانات)
+   ============================================================ */
+function confirmDeleteProject(projectId, title) {
+    showConfirmModal(
+        'حذف المشروع',
+        `هل أنت متأكد من حذف "${title}" نهائيًا؟ لن يستطيع أي شخص رؤيته بعد الآن.`,
+        async () => {
+            // 1) نمسح أول من الواجهة فورًا
+            const item = document.querySelector(`.admin-project-item[data-id="${projectId}"]`);
+            if (item) item.classList.add('deleting');
+
+            // 2) نحذف من Supabase
+            const { error, count } = await db
+                .from('projects')
+                .delete({ count: 'exact' })
+                .eq('id', projectId);
+
+            if (error) {
+                console.error('[DELETE ERROR]', error);
+                if (item) item.classList.remove('deleting');
+                showConfirmModal('فشل الحذف', `حدث خطأ: ${error.message}`, () => {}, 'danger');
+                return;
+            }
+
+            // 3) نتأكد إن الحذف تم فعلًا
+            if (count === 0) {
+                console.warn('[DELETE] no rows deleted — maybe RLS policy blocks delete');
+                if (item) item.classList.remove('deleting');
+                showConfirmModal(
+                    'لم يتم الحذف',
+                    'يبدو أن سياسة الحماية (RLS) في Supabase تمنع الحذف. تأكد من إعدادات الجدول.',
+                    () => {},
+                    'danger'
+                );
+                return;
+            }
+
+            // 4) نحذف من المصفوفة المحلية
+            allProjects = allProjects.filter(p => p.id !== projectId);
+
+            // 5) نعيد الرسم من جديد
+            renderAdminProjects();
+            renderAdminStats();
+
+            // 6) نحدّث index.html كمان (لو مفتوح في تاب تاني) — عن طريق BroadcastChannel
+            try {
+                const bc = new BroadcastChannel('vayro_projects');
+                bc.postMessage({ type: 'PROJECT_DELETED', projectId });
+                bc.close();
+            } catch(e) {}
+
+            // 7) نجيب البيانات من السيرفر للتأكد إنها اتحدثت
+            setTimeout(() => loadProjects(), 500);
+        },
+        'danger'
+    );
+}
+
+/* ============================================================
+   ADD PROJECT
+   ============================================================ */
+document.getElementById('adminAddProjectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('addSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري النشر...</span>';
+
+    const payload = {
+        title: document.getElementById('apTitle').value.trim(),
+        description: document.getElementById('apDesc').value.trim(),
+        category: document.getElementById('apCategory').value,
+        cover_url: document.getElementById('apCover').value.trim(),
+        live_url: document.getElementById('apLive').value.trim() || null,
+        code_price: parseInt(document.getElementById('apCodePrice').value) || 0,
+        old_price: parseInt(document.getElementById('apOldPrice').value) || 0,
+        is_featured: document.getElementById('apFeatured').value === 'true',
+        views_count: 0, likes_count: 0, comments_count: 0, shares_count: 0
+    };
+
+    if (!payload.title || !payload.description || !payload.cover_url) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>نشر المشروع الآن</span>';
+        return;
+    }
+
+    const { error } = await db.from('projects').insert([payload]);
+
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>نشر المشروع الآن</span>';
+
+    if (error) {
+        console.error('[INSERT ERROR]', error);
+        showConfirmModal('فشل النشر', `حدث خطأ: ${error.message}`, () => {}, 'danger');
+        return;
+    }
+
+    document.getElementById('adminAddProjectForm').reset();
+    await loadProjects();
+
+    // إشعار الصفحة الرئيسية
+    try {
+        const bc = new BroadcastChannel('vayro_projects');
+        bc.postMessage({ type: 'PROJECT_ADDED' });
+        bc.close();
+    } catch(e) {}
+
+    setTimeout(() => switchAdminTab('projects'), 300);
+});
+
+/* ============================================================
+   EDIT PROJECT
+   ============================================================ */
+function openEditModal(projectId) {
+    const p = allProjects.find(x => x.id === projectId);
+    if (!p) return;
+    document.getElementById('epId').value = p.id;
+    document.getElementById('epTitle').value = p.title || '';
+    document.getElementById('epDesc').value = p.description || '';
+    document.getElementById('epCategory').value = p.category || 'websites';
+    document.getElementById('epFeatured').value = p.is_featured ? 'true' : 'false';
+    document.getElementById('epCover').value = p.cover_url || '';
+    document.getElementById('epLive').value = p.live_url || '';
+    document.getElementById('epCodePrice').value = p.code_price || 0;
+    document.getElementById('epOldPrice').value = p.old_price || 0;
+    document.getElementById('editAlert').className = 'inline-alert';
+    document.getElementById('editModal').classList.add('active');
+}
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+}
+
+document.getElementById('editProjectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('epId').value;
+    const btn = document.getElementById('editSubmitBtn');
+    const alertBox = document.getElementById('editAlert');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري الحفظ...</span>';
+    alertBox.className = 'inline-alert';
+
+    const payload = {
+        title: document.getElementById('epTitle').value.trim(),
+        description: document.getElementById('epDesc').value.trim(),
+        category: document.getElementById('epCategory').value,
+        cover_url: document.getElementById('epCover').value.trim(),
+        live_url: document.getElementById('epLive').value.trim() || null,
+        code_price: parseInt(document.getElementById('epCodePrice').value) || 0,
+        old_price: parseInt(document.getElementById('epOldPrice').value) || 0,
+        is_featured: document.getElementById('epFeatured').value === 'true'
+    };
+
+    if (!payload.title || !payload.description || !payload.cover_url) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>حفظ التعديلات</span>';
+        alertBox.className = 'inline-alert error show';
+        alertBox.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>املأ الحقول المطلوبة</span>';
+        return;
+    }
+
+    const { error } = await db.from('projects').update(payload).eq('id', id);
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>حفظ التعديلات</span>';
+
+    if (error) {
+        console.error('[UPDATE ERROR]', error);
+        alertBox.className = 'inline-alert error show';
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${error.message}</span>`;
+        return;
+    }
+
+    alertBox.className = 'inline-alert success show';
+    alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>تم حفظ التعديلات</span>';
+
+    await loadProjects();
+
+    try {
+        const bc = new BroadcastChannel('vayro_projects');
+        bc.postMessage({ type: 'PROJECT_UPDATED', projectId: id });
+        bc.close();
+    } catch(e) {}
+
+    setTimeout(() => closeEditModal(), 800);
+});
+
+/* ============================================================
+   CHANGE PASSWORD
+   ============================================================ */
+const ADMIN_STORAGE_KEY = 'vayro_admin_credentials';
+
+function getAdminCredentials() {
+    try {
+        const raw = localStorage.getItem(ADMIN_STORAGE_KEY);
+        if (!raw) return { username: 'admin', password: 'admin123' };
+        return JSON.parse(raw);
+    } catch (e) { return { username: 'admin', password: 'admin123' }; }
+}
+
+document.getElementById('adminChangePassForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const username = document.getElementById('cpUsername').value.trim();
+    const oldPassword = document.getElementById('cpOldPassword').value;
+    const newPassword = document.getElementById('cpNewPassword').value;
+    const confirmPassword = document.getElementById('cpConfirmPassword').value;
+
+    const saved = getAdminCredentials();
+
+    if (username !== saved.username) {
+        showConfirmModal('خطأ', 'اسم المستخدم غير صحيح', () => {}, 'danger');
+        return;
+    }
+    if (oldPassword !== saved.password) {
+        showConfirmModal('خطأ', 'كلمة السر الحالية غير صحيحة', () => {}, 'danger');
+        return;
+    }
+    if (newPassword.length < 6) {
+        showConfirmModal('خطأ', 'كلمة السر الجديدة 6 أحرف على الأقل', () => {}, 'danger');
+        return;
+    }
+    if (newPassword !== confirmPassword) {
+        showConfirmModal('خطأ', 'تأكيد كلمة السر غير متطابق', () => {}, 'danger');
+        return;
+    }
+
+    showConfirmModal(
+        'تأكيد التغيير',
+        'هل أنت متأكد من تغيير كلمة المرور؟',
+        () => {
+            const updated = { username, password: newPassword, created_at: saved.created_at || Date.now(), updated_at: Date.now() };
+            localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(updated));
+            document.getElementById('adminChangePassForm').reset();
+            showConfirmModal('تم بنجاح', 'تم تغيير كلمة المرور بنجاح', () => {}, 'success');
+        },
+        'success'
+    );
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    const ok = checkAdminAccess();
+    if (!ok) return;
+    loadProjects();
+
+    document.getElementById('confirmModal').addEventListener('click', (e) => {
+        if (e.target.id === 'confirmModal') closeConfirmModal();
+    });
+    document.getElementById('editModal').addEventListener('click', (e) => {
+        if (e.target.id === 'editModal') closeEditModal();
+    });
+});
+</script>
+</body>
+</html>
