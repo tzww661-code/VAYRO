@@ -2406,7 +2406,7 @@ async function ensureProfile(user) {
 function openAuthModal() { document.getElementById('auth-modal').classList.add('active'); document.getElementById('authError').classList.remove('show'); gsap.fromTo('.modal-box', { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22 }); closeSideMenu(); }
 function closeAuthModal() { document.getElementById('auth-modal').classList.remove('active'); }
 async function loginWithGoogle() {
-    const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin, queryParams: { access_type: 'offline', prompt: 'consent' } } });
+    const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { access_type: 'offline', prompt: 'consent' } } });
     if (error) showAuthError(error.message);
 }
 function showAuthError(msg) { const el = document.getElementById('authError'); el.textContent = msg; el.classList.add('show'); }
