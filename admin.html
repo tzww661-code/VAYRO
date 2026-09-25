@@ -756,20 +756,25 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
     </div>
 </div>
 
-<script>
+
+    
+    
+    
+    
+    
+    <script>
 /* ============================================================
-   SUPABASE
+   SUPABASE SETUP
    ============================================================ */
 const SUPABASE_URL = 'https://iujkmcawxfhwrmlkdxgg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NCTgz3VA1ZrLY-GrciTt8w_0gqO-2f6';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const STORAGE_BUCKET = 'covers'; // ← اسم الباكيت في Supabase Storage
 
 let allProjects = [];
-let uploadedCoverUrl = { ap: '', ep: '' }; // لحفظ رابط الصورة المرفوعة
+let uploadedCoverUrl = { ap: '', ep: '' };
 
 /* ============================================================
-   🔐 AUTH GUARD
+   🔐 AUTH GUARD — التحقق من الدخول
    ============================================================ */
 function checkAdminAccess() {
     const access = sessionStorage.getItem('vayro_admin_access');
@@ -795,9 +800,10 @@ function adminLogout() {
 }
 
 /* ============================================================
-   CONFIRM MODAL
+   CONFIRM MODAL — نافذة التأكيد
    ============================================================ */
 let _confirmCallback = null;
+
 function showConfirmModal(title, msg, callback, iconType = 'question') {
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMsg').textContent = msg;
@@ -823,10 +829,12 @@ function showConfirmModal(title, msg, callback, iconType = 'question') {
     _confirmCallback = callback;
     document.getElementById('confirmModal').classList.add('active');
 }
+
 function closeConfirmModal() {
     document.getElementById('confirmModal').classList.remove('active');
     _confirmCallback = null;
 }
+
 document.getElementById('confirmApproveBtn').addEventListener('click', async () => {
     if (!_confirmCallback) { closeConfirmModal(); return; }
     const btn = document.getElementById('confirmApproveBtn');
@@ -840,7 +848,7 @@ document.getElementById('confirmApproveBtn').addEventListener('click', async () 
 });
 
 /* ============================================================
-   TABS
+   TABS — التنقل بين التابات
    ============================================================ */
 function switchAdminTab(tab) {
     document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
@@ -854,19 +862,21 @@ function switchAdminTab(tab) {
 }
 
 /* ============================================================
-   🖼️ IMAGE UPLOAD SYSTEM
+   🖼️ IMAGE UPLOAD SYSTEM — Base64 (بدون Bucket)
    ============================================================ */
 async function handleCoverUpload(event, prefix) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // التحقق من نوع وحجم الملف
+    // التحقق من نوع الصورة
     if (!file.type.startsWith('image/')) {
         showConfirmModal('خطأ', 'الرجاء اختيار صورة صحيحة', () => {}, 'danger');
         return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-        showConfirmModal('خطأ', 'حجم الصورة كبير (الحد الأقصى 5 ميجا)', () => {}, 'danger');
+
+    // التحقق من حجم الصورة (2 ميجا)
+    if (file.size > 2 * 1024 * 1024) {
+        showConfirmModal('خطأ', 'حجم الصورة كبير (الحد الأقصى 2 ميجا)', () => {}, 'danger');
         return;
     }
 
@@ -875,52 +885,60 @@ async function handleCoverUpload(event, prefix) {
     const progressEl = document.getElementById(prefix + 'CoverProgress');
     const urlInput = document.getElementById(prefix + 'CoverUrl');
 
-    // عرض معاينة فورية
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        previewImg.src = e.target.result;
-        pickerBox.classList.add('has-image');
-    };
-    reader.readAsDataURL(file);
-
-    // عرض مؤشر الرفع
+    // عرض مؤشر التحميل
     progressEl.classList.add('show');
 
-    // رفع لـ Supabase Storage
     try {
-        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-        const fileName = `cover_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-        const filePath = fileName;
+        // ضغط الصورة + تحويلها لـ Base64
+        const compressedBase64 = await compressImage(file, 800, 0.75);
 
-        const { error: uploadError } = await db.storage
-            .from(STORAGE_BUCKET)
-            .upload(filePath, file, {
-                cacheControl: '3600',
-                upsert: false,
-                contentType: file.type
-            });
-
-        if (uploadError) {
-            console.error('[UPLOAD ERROR]', uploadError);
-            progressEl.classList.remove('show');
-            showConfirmModal('فشل الرفع', `حدث خطأ: ${uploadError.message}`, () => {}, 'danger');
-            return;
-        }
-
-        // الحصول على الرابط العام
-        const { data: urlData } = db.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
-        const publicUrl = urlData.publicUrl;
-
-        uploadedCoverUrl[prefix] = publicUrl;
-        previewImg.src = publicUrl;
-        urlInput.value = publicUrl;
+        // عرض المعاينة
+        previewImg.src = compressedBase64;
+        pickerBox.classList.add('has-image');
+        urlInput.value = compressedBase64;
+        uploadedCoverUrl[prefix] = compressedBase64;
         progressEl.classList.remove('show');
 
     } catch (err) {
-        console.error('[UPLOAD EXCEPTION]', err);
+        console.error('[COMPRESS ERROR]', err);
         progressEl.classList.remove('show');
-        showConfirmModal('فشل الرفع', 'حدث خطأ غير متوقع أثناء رفع الصورة', () => {}, 'danger');
+        showConfirmModal('فشل الرفع', 'حدث خطأ أثناء معالجة الصورة', () => {}, 'danger');
     }
+}
+
+/* ضغط الصورة وتحويلها لـ Base64 */
+function compressImage(file, maxWidth = 800, quality = 0.75) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // تصغير الأبعاد لو كبيرة
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // تحويل لـ Base64 مضغوط
+                const base64 = canvas.toDataURL('image/jpeg', quality);
+                resolve(base64);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 function removeCover(event, prefix) {
@@ -947,7 +965,6 @@ function handleCoverUrlInput(url, prefix) {
         return;
     }
 
-    // معاينة الرابط
     previewImg.src = url;
     pickerBox.classList.add('has-image');
     uploadedCoverUrl[prefix] = url;
@@ -1014,7 +1031,7 @@ function openLiveSite(url) {
 }
 
 /* ============================================================
-   ✅ DELETE PROJECT
+   ✅ DELETE PROJECT — حذف المشروع
    ============================================================ */
 function confirmDeleteProject(projectId, title) {
     showConfirmModal(
@@ -1052,7 +1069,7 @@ function confirmDeleteProject(projectId, title) {
 }
 
 /* ============================================================
-   ➕ ADD PROJECT
+   ➕ ADD PROJECT — إضافة مشروع
    ============================================================ */
 document.getElementById('adminAddProjectForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1109,7 +1126,7 @@ document.getElementById('adminAddProjectForm').addEventListener('submit', async 
 });
 
 /* ============================================================
-   ✏️ EDIT PROJECT
+   ✏️ EDIT PROJECT — تعديل المشروع
    ============================================================ */
 function openEditModal(projectId) {
     const p = allProjects.find(x => x.id === projectId);
@@ -1142,6 +1159,7 @@ function openEditModal(projectId) {
     document.getElementById('editAlert').className = 'inline-alert';
     document.getElementById('editModal').classList.add('active');
 }
+
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('active');
 }
@@ -1205,7 +1223,7 @@ document.getElementById('editProjectForm').addEventListener('submit', async (e) 
 });
 
 /* ============================================================
-   CHANGE PASSWORD
+   CHANGE PASSWORD — تغيير كلمة المرور
    ============================================================ */
 const ADMIN_STORAGE_KEY = 'vayro_admin_credentials';
 
@@ -1257,7 +1275,7 @@ document.getElementById('adminChangePassForm').addEventListener('submit', (e) =>
 });
 
 /* ============================================================
-   INIT
+   INIT — التشغيل
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
     const ok = checkAdminAccess();
@@ -1272,5 +1290,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+        
 </body>
 </html>
