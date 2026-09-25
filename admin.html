@@ -153,6 +153,142 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .admin-btn.ghost:hover { border-color: var(--accent-color); color: var(--accent-color); }
 .admin-btn.full { width: 100%; }
 
+/* ============ IMAGE PICKER (رفع صورة) ============ */
+.image-picker-box {
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    background: var(--bg-tertiary);
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.image-picker-box:hover {
+    border-color: var(--accent-color);
+    background: var(--accent-light);
+}
+.image-picker-box.has-image {
+    padding: 0;
+    border-style: solid;
+    border-color: var(--accent-color);
+    min-height: auto;
+}
+.image-picker-icon {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    background: var(--accent-light);
+    color: var(--accent-color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+}
+.image-picker-box:hover .image-picker-icon {
+    background: var(--accent-color);
+    color: #FFF;
+}
+.image-picker-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+.image-picker-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.image-preview-wrap {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    border-radius: 14px;
+    overflow: hidden;
+    display: none;
+}
+.image-picker-box.has-image .image-preview-wrap { display: block; }
+.image-picker-box.has-image .image-picker-empty { display: none; }
+.image-preview-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+.image-preview-remove {
+    position: absolute;
+    top: 10px; left: 10px;
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #FFF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 2;
+    border: none;
+}
+.image-preview-remove:hover {
+    background: var(--danger);
+    transform: scale(1.08);
+}
+.image-preview-badge {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #FFF;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+}
+.image-preview-badge i { color: var(--success); }
+.image-upload-progress {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: #FFF;
+    font-size: 0.85rem;
+    font-weight: 700;
+    z-index: 3;
+}
+.image-upload-progress.show { display: flex; }
+.image-upload-progress .spinner {
+    width: 42px; height: 42px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Divider */
+.or-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+.or-divider::before, .or-divider::after {
+    content: "";
+    flex-grow: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
 /* Projects List */
 .admin-projects-list { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .admin-project-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: var(--bg-tertiary); border: 1px solid var(--border-color); transition: all 0.2s; }
@@ -209,13 +345,26 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 .guard-box .guard-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
 /* Edit Modal */
-.edit-modal-box { max-width: 560px; max-height: 90vh; overflow-y: auto; }
+.edit-modal-box { max-width: 620px; max-height: 92vh; overflow-y: auto; }
 .edit-modal-box h3 { text-align: center; font-size: 1.2rem; margin-bottom: 8px; font-weight: 800; }
 .edit-modal-box .edit-sub { text-align: center; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 20px; }
 .edit-modal-close { position: absolute; top: 14px; left: 14px; width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); }
 .edit-modal-close:hover { color: var(--danger); border-color: var(--danger); }
 
-/* Inline notification (بدل التوست الخضراء) */
+/* Section divider in form */
+.form-section-title {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    display: flex; align-items: center; gap: 8px;
+    margin: 6px 0 0;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+/* Inline notification */
 .inline-alert {
     padding: 12px 16px;
     border-radius: 12px;
@@ -341,13 +490,16 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
             </div>
         </div>
 
-        <!-- TAB: Add Project -->
+        <!-- ========== TAB: Add Project ========== -->
         <div class="admin-panel-section" id="tab-add" style="display: none;">
             <div class="admin-panel-header">
                 <h3><i class="fa-solid fa-plus"></i> إضافة مشروع جديد</h3>
             </div>
             <div class="admin-panel-body">
                 <form class="admin-form" id="adminAddProjectForm">
+
+                    <div class="form-section-title"><i class="fa-solid fa-circle-info"></i> المعلومات الأساسية</div>
+
                     <div class="admin-form-group">
                         <label><i class="fa-solid fa-heading"></i> اسم المشروع</label>
                         <input type="text" id="apTitle" placeholder="مثال: موقع شخصي" required>
@@ -376,24 +528,67 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
                             </select>
                         </div>
                     </div>
-                    <div class="admin-form-group">
-                        <label><i class="fa-solid fa-image"></i> رابط صورة الغلاف</label>
-                        <input type="url" id="apCover" placeholder="https://..." required>
+
+                    <!-- ============ صورة الغلاف ============ -->
+                    <div class="form-section-title"><i class="fa-solid fa-image"></i> صورة الغلاف</div>
+
+                    <div class="image-picker-box" id="apCoverPicker" onclick="document.getElementById('apCoverFile').click()">
+                        <input type="file" id="apCoverFile" accept="image/*" style="display:none" onchange="handleCoverUpload(event, 'ap')">
+                        <div class="image-picker-empty">
+                            <div class="image-picker-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                            <div class="image-picker-title">اختر صورة من جهازك</div>
+                            <div class="image-picker-sub">أو اضغط لاختيار صورة (JPG, PNG, WEBP)</div>
+                        </div>
+                        <div class="image-preview-wrap">
+                            <img id="apCoverPreview" src="" alt="">
+                            <button type="button" class="image-preview-remove" onclick="removeCover(event, 'ap')"><i class="fa-solid fa-xmark"></i></button>
+                            <div class="image-preview-badge"><i class="fa-solid fa-circle-check"></i> تم الرفع</div>
+                            <div class="image-upload-progress" id="apCoverProgress">
+                                <div class="spinner"></div>
+                                <span>جاري رفع الصورة...</span>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="or-divider">أو</div>
+
                     <div class="admin-form-group">
-                        <label><i class="fa-solid fa-link"></i> رابط الموقع المباشر (اختياري)</label>
+                        <label><i class="fa-solid fa-link"></i> رابط الصورة المباشر</label>
+                        <input type="url" id="apCoverUrl" placeholder="https://example.com/image.jpg" oninput="handleCoverUrlInput(this.value, 'ap')">
+                    </div>
+
+                    <!-- ============ روابط ============ -->
+                    <div class="form-section-title"><i class="fa-solid fa-link"></i> الروابط</div>
+
+                    <div class="admin-form-group">
+                        <label><i class="fa-solid fa-globe"></i> رابط الموقع المباشر (اختياري)</label>
                         <input type="url" id="apLive" placeholder="https://...">
                     </div>
+
+                    <!-- ============ الأسعار ============ -->
+                    <div class="form-section-title"><i class="fa-solid fa-tags"></i> الأسعار</div>
+
                     <div class="admin-form-row">
                         <div class="admin-form-group">
-                            <label><i class="fa-solid fa-code"></i> سعر الكود</label>
+                            <label><i class="fa-solid fa-code"></i> سعر الكود الكامل</label>
                             <input type="number" id="apCodePrice" placeholder="0" min="0">
                         </div>
                         <div class="admin-form-group">
-                            <label><i class="fa-solid fa-tags"></i> السعر القديم (اختياري)</label>
+                            <label><i class="fa-solid fa-link"></i> سعر لينك الموقع</label>
+                            <input type="number" id="apLinkPrice" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    <div class="admin-form-row">
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-wand-magic-sparkles"></i> سعر الحاجة الإلكترونية</label>
+                            <input type="number" id="apCustomPrice" placeholder="0" min="0">
+                        </div>
+                        <div class="admin-form-group">
+                            <label><i class="fa-solid fa-tag"></i> السعر القديم (اختياري)</label>
                             <input type="number" id="apOldPrice" placeholder="0" min="0">
                         </div>
                     </div>
+
                     <button type="submit" class="admin-btn success full" id="addSubmitBtn">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
                         <span>نشر المشروع الآن</span>
@@ -464,6 +659,9 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
         <div class="inline-alert" id="editAlert"></div>
         <form class="admin-form" id="editProjectForm">
             <input type="hidden" id="epId">
+
+            <div class="form-section-title"><i class="fa-solid fa-circle-info"></i> المعلومات الأساسية</div>
+
             <div class="admin-form-group">
                 <label><i class="fa-solid fa-heading"></i> اسم المشروع</label>
                 <input type="text" id="epTitle" required>
@@ -492,24 +690,64 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
                     </select>
                 </div>
             </div>
-            <div class="admin-form-group">
-                <label><i class="fa-solid fa-image"></i> رابط صورة الغلاف</label>
-                <input type="url" id="epCover" required>
+
+            <div class="form-section-title"><i class="fa-solid fa-image"></i> صورة الغلاف</div>
+
+            <div class="image-picker-box" id="epCoverPicker" onclick="document.getElementById('epCoverFile').click()">
+                <input type="file" id="epCoverFile" accept="image/*" style="display:none" onchange="handleCoverUpload(event, 'ep')">
+                <div class="image-picker-empty">
+                    <div class="image-picker-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div class="image-picker-title">اختر صورة من جهازك</div>
+                    <div class="image-picker-sub">أو اضغط لاختيار صورة</div>
+                </div>
+                <div class="image-preview-wrap">
+                    <img id="epCoverPreview" src="" alt="">
+                    <button type="button" class="image-preview-remove" onclick="removeCover(event, 'ep')"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="image-preview-badge"><i class="fa-solid fa-circle-check"></i> تم الرفع</div>
+                    <div class="image-upload-progress" id="epCoverProgress">
+                        <div class="spinner"></div>
+                        <span>جاري رفع الصورة...</span>
+                    </div>
+                </div>
             </div>
+
+            <div class="or-divider">أو</div>
+
             <div class="admin-form-group">
-                <label><i class="fa-solid fa-link"></i> رابط الموقع المباشر (اختياري)</label>
+                <label><i class="fa-solid fa-link"></i> رابط الصورة المباشر</label>
+                <input type="url" id="epCoverUrl" placeholder="https://example.com/image.jpg" oninput="handleCoverUrlInput(this.value, 'ep')">
+            </div>
+
+            <div class="form-section-title"><i class="fa-solid fa-link"></i> الروابط</div>
+
+            <div class="admin-form-group">
+                <label><i class="fa-solid fa-globe"></i> رابط الموقع المباشر (اختياري)</label>
                 <input type="url" id="epLive">
             </div>
+
+            <div class="form-section-title"><i class="fa-solid fa-tags"></i> الأسعار</div>
+
             <div class="admin-form-row">
                 <div class="admin-form-group">
-                    <label><i class="fa-solid fa-code"></i> سعر الكود</label>
+                    <label><i class="fa-solid fa-code"></i> سعر الكود الكامل</label>
                     <input type="number" id="epCodePrice" placeholder="0" min="0">
                 </div>
                 <div class="admin-form-group">
-                    <label><i class="fa-solid fa-tags"></i> السعر القديم (اختياري)</label>
+                    <label><i class="fa-solid fa-link"></i> سعر لينك الموقع</label>
+                    <input type="number" id="epLinkPrice" placeholder="0" min="0">
+                </div>
+            </div>
+            <div class="admin-form-row">
+                <div class="admin-form-group">
+                    <label><i class="fa-solid fa-wand-magic-sparkles"></i> سعر الحاجة الإلكترونية</label>
+                    <input type="number" id="epCustomPrice" placeholder="0" min="0">
+                </div>
+                <div class="admin-form-group">
+                    <label><i class="fa-solid fa-tag"></i> السعر القديم (اختياري)</label>
                     <input type="number" id="epOldPrice" placeholder="0" min="0">
                 </div>
             </div>
+
             <button type="submit" class="admin-btn success full" id="editSubmitBtn">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>حفظ التعديلات</span>
@@ -525,8 +763,10 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 const SUPABASE_URL = 'https://iujkmcawxfhwrmlkdxgg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_NCTgz3VA1ZrLY-GrciTt8w_0gqO-2f6';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const STORAGE_BUCKET = 'covers'; // ← اسم الباكيت في Supabase Storage
 
 let allProjects = [];
+let uploadedCoverUrl = { ap: '', ep: '' }; // لحفظ رابط الصورة المرفوعة
 
 /* ============================================================
    🔐 AUTH GUARD
@@ -614,6 +854,106 @@ function switchAdminTab(tab) {
 }
 
 /* ============================================================
+   🖼️ IMAGE UPLOAD SYSTEM
+   ============================================================ */
+async function handleCoverUpload(event, prefix) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // التحقق من نوع وحجم الملف
+    if (!file.type.startsWith('image/')) {
+        showConfirmModal('خطأ', 'الرجاء اختيار صورة صحيحة', () => {}, 'danger');
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showConfirmModal('خطأ', 'حجم الصورة كبير (الحد الأقصى 5 ميجا)', () => {}, 'danger');
+        return;
+    }
+
+    const pickerBox = document.getElementById(prefix + 'CoverPicker');
+    const previewImg = document.getElementById(prefix + 'CoverPreview');
+    const progressEl = document.getElementById(prefix + 'CoverProgress');
+    const urlInput = document.getElementById(prefix + 'CoverUrl');
+
+    // عرض معاينة فورية
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        pickerBox.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
+
+    // عرض مؤشر الرفع
+    progressEl.classList.add('show');
+
+    // رفع لـ Supabase Storage
+    try {
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const fileName = `cover_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+        const filePath = fileName;
+
+        const { error: uploadError } = await db.storage
+            .from(STORAGE_BUCKET)
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: file.type
+            });
+
+        if (uploadError) {
+            console.error('[UPLOAD ERROR]', uploadError);
+            progressEl.classList.remove('show');
+            showConfirmModal('فشل الرفع', `حدث خطأ: ${uploadError.message}`, () => {}, 'danger');
+            return;
+        }
+
+        // الحصول على الرابط العام
+        const { data: urlData } = db.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+        const publicUrl = urlData.publicUrl;
+
+        uploadedCoverUrl[prefix] = publicUrl;
+        previewImg.src = publicUrl;
+        urlInput.value = publicUrl;
+        progressEl.classList.remove('show');
+
+    } catch (err) {
+        console.error('[UPLOAD EXCEPTION]', err);
+        progressEl.classList.remove('show');
+        showConfirmModal('فشل الرفع', 'حدث خطأ غير متوقع أثناء رفع الصورة', () => {}, 'danger');
+    }
+}
+
+function removeCover(event, prefix) {
+    if (event) event.stopPropagation();
+    const pickerBox = document.getElementById(prefix + 'CoverPicker');
+    const previewImg = document.getElementById(prefix + 'CoverPreview');
+    const urlInput = document.getElementById(prefix + 'CoverUrl');
+    const fileInput = document.getElementById(prefix + 'CoverFile');
+
+    pickerBox.classList.remove('has-image');
+    previewImg.src = '';
+    urlInput.value = '';
+    fileInput.value = '';
+    uploadedCoverUrl[prefix] = '';
+}
+
+function handleCoverUrlInput(url, prefix) {
+    const pickerBox = document.getElementById(prefix + 'CoverPicker');
+    const previewImg = document.getElementById(prefix + 'CoverPreview');
+
+    if (!url || !url.trim()) {
+        pickerBox.classList.remove('has-image');
+        previewImg.src = '';
+        return;
+    }
+
+    // معاينة الرابط
+    previewImg.src = url;
+    pickerBox.classList.add('has-image');
+    uploadedCoverUrl[prefix] = url;
+}
+
+/* ============================================================
    LOAD & RENDER PROJECTS
    ============================================================ */
 async function loadProjects() {
@@ -674,58 +1014,37 @@ function openLiveSite(url) {
 }
 
 /* ============================================================
-   ✅ DELETE PROJECT (إصلاح كامل + مسح من قاعدة البيانات)
+   ✅ DELETE PROJECT
    ============================================================ */
 function confirmDeleteProject(projectId, title) {
     showConfirmModal(
         'حذف المشروع',
-        `هل أنت متأكد من حذف "${title}" نهائيًا؟ لن يستطيع أي شخص رؤيته بعد الآن.`,
+        `هل أنت متأكد من حذف "${title}" نهائيًا؟`,
         async () => {
-            // 1) نمسح أول من الواجهة فورًا
             const item = document.querySelector(`.admin-project-item[data-id="${projectId}"]`);
             if (item) item.classList.add('deleting');
 
-            // 2) نحذف من Supabase
             const { error, count } = await db
                 .from('projects')
                 .delete({ count: 'exact' })
                 .eq('id', projectId);
 
             if (error) {
-                console.error('[DELETE ERROR]', error);
                 if (item) item.classList.remove('deleting');
                 showConfirmModal('فشل الحذف', `حدث خطأ: ${error.message}`, () => {}, 'danger');
                 return;
             }
 
-            // 3) نتأكد إن الحذف تم فعلًا
-            if (count === 0) {
-                console.warn('[DELETE] no rows deleted — maybe RLS policy blocks delete');
-                if (item) item.classList.remove('deleting');
-                showConfirmModal(
-                    'لم يتم الحذف',
-                    'يبدو أن سياسة الحماية (RLS) في Supabase تمنع الحذف. تأكد من إعدادات الجدول.',
-                    () => {},
-                    'danger'
-                );
-                return;
-            }
-
-            // 4) نحذف من المصفوفة المحلية
             allProjects = allProjects.filter(p => p.id !== projectId);
-
-            // 5) نعيد الرسم من جديد
             renderAdminProjects();
             renderAdminStats();
 
-            // 6) نحدّث index.html كمان (لو مفتوح في تاب تاني) — عن طريق BroadcastChannel
             try {
                 const bc = new BroadcastChannel('vayro_projects');
                 bc.postMessage({ type: 'PROJECT_DELETED', projectId });
                 bc.close();
             } catch(e) {}
 
-            // 7) نجيب البيانات من السيرفر للتأكد إنها اتحدثت
             setTimeout(() => loadProjects(), 500);
         },
         'danger'
@@ -733,7 +1052,7 @@ function confirmDeleteProject(projectId, title) {
 }
 
 /* ============================================================
-   ADD PROJECT
+   ➕ ADD PROJECT
    ============================================================ */
 document.getElementById('adminAddProjectForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -741,13 +1060,18 @@ document.getElementById('adminAddProjectForm').addEventListener('submit', async 
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري النشر...</span>';
 
+    // الصورة من الرفع أو الرابط
+    const coverUrl = uploadedCoverUrl.ap || document.getElementById('apCoverUrl').value.trim();
+
     const payload = {
         title: document.getElementById('apTitle').value.trim(),
         description: document.getElementById('apDesc').value.trim(),
         category: document.getElementById('apCategory').value,
-        cover_url: document.getElementById('apCover').value.trim(),
+        cover_url: coverUrl,
         live_url: document.getElementById('apLive').value.trim() || null,
         code_price: parseInt(document.getElementById('apCodePrice').value) || 0,
+        link_price: parseInt(document.getElementById('apLinkPrice').value) || 0,
+        custom_price: parseInt(document.getElementById('apCustomPrice').value) || 0,
         old_price: parseInt(document.getElementById('apOldPrice').value) || 0,
         is_featured: document.getElementById('apFeatured').value === 'true',
         views_count: 0, likes_count: 0, comments_count: 0, shares_count: 0
@@ -756,6 +1080,7 @@ document.getElementById('adminAddProjectForm').addEventListener('submit', async 
     if (!payload.title || !payload.description || !payload.cover_url) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>نشر المشروع الآن</span>';
+        showConfirmModal('خطأ', 'املأ كل الحقول المطلوبة + اختر صورة', () => {}, 'danger');
         return;
     }
 
@@ -771,9 +1096,9 @@ document.getElementById('adminAddProjectForm').addEventListener('submit', async 
     }
 
     document.getElementById('adminAddProjectForm').reset();
+    removeCover(null, 'ap');
     await loadProjects();
 
-    // إشعار الصفحة الرئيسية
     try {
         const bc = new BroadcastChannel('vayro_projects');
         bc.postMessage({ type: 'PROJECT_ADDED' });
@@ -784,20 +1109,36 @@ document.getElementById('adminAddProjectForm').addEventListener('submit', async 
 });
 
 /* ============================================================
-   EDIT PROJECT
+   ✏️ EDIT PROJECT
    ============================================================ */
 function openEditModal(projectId) {
     const p = allProjects.find(x => x.id === projectId);
     if (!p) return;
+
     document.getElementById('epId').value = p.id;
     document.getElementById('epTitle').value = p.title || '';
     document.getElementById('epDesc').value = p.description || '';
     document.getElementById('epCategory').value = p.category || 'websites';
     document.getElementById('epFeatured').value = p.is_featured ? 'true' : 'false';
-    document.getElementById('epCover').value = p.cover_url || '';
     document.getElementById('epLive').value = p.live_url || '';
     document.getElementById('epCodePrice').value = p.code_price || 0;
+    document.getElementById('epLinkPrice').value = p.link_price || 0;
+    document.getElementById('epCustomPrice').value = p.custom_price || 0;
     document.getElementById('epOldPrice').value = p.old_price || 0;
+
+    // الصورة
+    const pickerBox = document.getElementById('epCoverPicker');
+    const previewImg = document.getElementById('epCoverPreview');
+    const urlInput = document.getElementById('epCoverUrl');
+    if (p.cover_url) {
+        previewImg.src = p.cover_url;
+        pickerBox.classList.add('has-image');
+        urlInput.value = p.cover_url;
+        uploadedCoverUrl.ep = p.cover_url;
+    } else {
+        removeCover(null, 'ep');
+    }
+
     document.getElementById('editAlert').className = 'inline-alert';
     document.getElementById('editModal').classList.add('active');
 }
@@ -815,13 +1156,17 @@ document.getElementById('editProjectForm').addEventListener('submit', async (e) 
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري الحفظ...</span>';
     alertBox.className = 'inline-alert';
 
+    const coverUrl = uploadedCoverUrl.ep || document.getElementById('epCoverUrl').value.trim();
+
     const payload = {
         title: document.getElementById('epTitle').value.trim(),
         description: document.getElementById('epDesc').value.trim(),
         category: document.getElementById('epCategory').value,
-        cover_url: document.getElementById('epCover').value.trim(),
+        cover_url: coverUrl,
         live_url: document.getElementById('epLive').value.trim() || null,
         code_price: parseInt(document.getElementById('epCodePrice').value) || 0,
+        link_price: parseInt(document.getElementById('epLinkPrice').value) || 0,
+        custom_price: parseInt(document.getElementById('epCustomPrice').value) || 0,
         old_price: parseInt(document.getElementById('epOldPrice').value) || 0,
         is_featured: document.getElementById('epFeatured').value === 'true'
     };
@@ -830,7 +1175,7 @@ document.getElementById('editProjectForm').addEventListener('submit', async (e) 
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>حفظ التعديلات</span>';
         alertBox.className = 'inline-alert error show';
-        alertBox.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>املأ الحقول المطلوبة</span>';
+        alertBox.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>املأ الحقول المطلوبة + اختر صورة</span>';
         return;
     }
 
@@ -840,7 +1185,6 @@ document.getElementById('editProjectForm').addEventListener('submit', async (e) 
     btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>حفظ التعديلات</span>';
 
     if (error) {
-        console.error('[UPDATE ERROR]', error);
         alertBox.className = 'inline-alert error show';
         alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${error.message}</span>`;
         return;
